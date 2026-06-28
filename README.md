@@ -44,18 +44,11 @@ The application validates uploaded CSV files, removes duplicate transactions, cl
 
 ---
 
-# System Architecture
+## System Architecture
 
-> Replace the image path below with your uploaded architecture diagram.
+The following architecture illustrates the end-to-end workflow of the AI-powered transaction processing pipeline. It demonstrates how transaction CSV files are uploaded, processed asynchronously using Celery and Redis, enhanced with Google Gemini AI for intelligent analysis, and finally stored in PostgreSQL for retrieval through REST APIs.
 
-```text
-README.md
-architecture.png
-```
-
-```md
 ![System Architecture](architecture.png)
-```
 
 ---
 
