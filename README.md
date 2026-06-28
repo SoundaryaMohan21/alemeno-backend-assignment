@@ -1,95 +1,136 @@
 # Alemeno Backend Assignment
 
-## Transaction Processing Pipeline API
+# AI-Powered Transaction Processing Pipeline
 
-A FastAPI-based backend service for uploading, validating, cleaning, and storing financial transaction data.
+A production-ready backend service built using **FastAPI**, **Celery**, **Redis**, **PostgreSQL**, and **Google Gemini AI** for processing financial transaction CSV files asynchronously.
 
-The application processes CSV files containing transaction records, removes duplicate transaction IDs, stores cleaned records in PostgreSQL, and maintains processing job history.
+The application validates uploaded CSV files, removes duplicate transactions, classifies uncategorized transactions using AI, detects suspicious transactions, generates spending summaries, and stores all cleaned records in PostgreSQL while tracking every processing job.
 
 ---
 
-## Features
+# Features
 
 * Upload transaction CSV files
-* Validate uploaded files
-* Remove duplicate transaction IDs
-* Store cleaned transactions in PostgreSQL
-* Track every processing job
-* Retrieve processing history
-* Check processing status of individual jobs
-* Swagger API documentation
-* Logging support
-* Clean project architecture
+* Background processing using Celery
+* Redis task queue integration
+* Automatic duplicate transaction removal
+* PostgreSQL database storage
+* AI-powered transaction category classification using Google Gemini
+* AI-powered anomaly detection
+* AI-generated spending summary
+* Job status tracking
+* Retrieve processed transaction results
+* RESTful APIs
+* Interactive Swagger Documentation
+* Dockerized deployment
+* Modular and scalable project architecture
 
 ---
 
-## Tech Stack
+# Tech Stack
 
 * Python 3.13
 * FastAPI
 * SQLAlchemy
 * PostgreSQL
+* Redis
+* Celery
 * Docker
-* Pydantic
+* Docker Compose
 * Pandas
+* Google Gemini API
+* Pydantic
 * Uvicorn
 
 ---
 
-## Project Structure
+# System Architecture
 
+> Replace the image path below with your uploaded architecture diagram.
+
+```text
+README.md
+architecture.png
 ```
+
+```md
+![System Architecture](architecture.png)
+```
+
+---
+
+# Project Structure
+
+```text
 alemeno-assignment/
 │
 ├── app/
 │   ├── core/
+│   │   └── database.py
+│   │
 │   ├── models/
+│   │   ├── job.py
+│   │   └── transaction.py
+│   │
 │   ├── routers/
+│   │   └── jobs.py
+│   │
 │   ├── schemas/
+│   │
 │   ├── services/
-│   ├── workers/
+│   │   ├── csv_processor.py
+│   │   ├── llm_service.py
+│   │   └── transaction_service.py
+│   │
+│   ├── worker.py
+│   ├── tasks.py
 │   └── main.py
 │
 ├── uploads/
 ├── reports/
 ├── tests/
-├── .env
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
 ├── README.md
-└── requirements.txt
+└── .env
 ```
 
 ---
 
-## Installation
+# Installation
 
-### Clone repository
-
-```bash
-git clone <repository_url>
-cd alemeno-assignment
-```
-
-### Create virtual environment
+## Clone Repository
 
 ```bash
-python -m venv venv
+git clone https://github.com/YOUR_USERNAME/alemeno-backend-assignment.git
+
+cd alemeno-backend-assignment
 ```
 
-Activate
+---
+
+## Create Virtual Environment
 
 Windows
 
 ```bash
+python -m venv venv
+
 venv\Scripts\activate
 ```
 
-Linux
+Linux / macOS
 
 ```bash
+python3 -m venv venv
+
 source venv/bin/activate
 ```
 
-Install dependencies
+---
+
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -97,21 +138,52 @@ pip install -r requirements.txt
 
 ---
 
-## Start PostgreSQL & Redis
+## Configure Environment Variables
+
+Create a `.env` file.
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/alemeno_db
+
+REDIS_URL=redis://localhost:6379/0
+```
+
+---
+
+## Start Docker Services
 
 ```bash
 docker compose up -d
 ```
 
+This starts:
+
+* PostgreSQL
+* Redis
+
 ---
 
-## Run the API
+## Start FastAPI Server
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Swagger UI
+---
+
+## Start Celery Worker
+
+```bash
+celery -A app.worker.celery_app worker --loglevel=info
+```
+
+---
+
+# Swagger Documentation
+
+After starting the application:
 
 ```
 http://127.0.0.1:8000/docs
@@ -119,19 +191,19 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## API Endpoints
+# API Endpoints
 
-### Upload Transaction CSV
+## Upload CSV
 
 ```
 POST /jobs/upload
 ```
 
-Uploads a CSV file, removes duplicate transaction IDs, stores cleaned transactions, and creates a processing job.
+Uploads a transaction CSV file and starts asynchronous processing.
 
 ---
 
-### List Processing Jobs
+## List Jobs
 
 ```
 GET /jobs
@@ -141,45 +213,163 @@ Returns all processing jobs.
 
 ---
 
-### Get Job Status
+## Get Job Status
 
 ```
 GET /jobs/{job_id}/status
 ```
 
-Returns detailed information about a processing job.
+Returns processing status for a specific job.
 
 ---
 
-## Sample Upload Response
+## Get Job Results
+
+```
+GET /jobs/{job_id}/results
+```
+
+Returns processed transactions for a specific job.
+
+---
+
+# AI Features
+
+The project integrates **Google Gemini** to provide intelligent financial analysis.
+
+### Transaction Category Classification
+
+Automatically classifies transactions whose category is missing.
+
+Example Categories
+
+* Food
+* Shopping
+* Travel
+* Transport
+* Utilities
+* Entertainment
+* Cash Withdrawal
+* Other
+
+---
+
+### Anomaly Detection
+
+Each transaction is analyzed by Gemini to determine whether it appears suspicious.
+
+Possible Output
+
+```
+Yes
+```
+
+or
+
+```
+No
+```
+
+---
+
+### Spending Summary
+
+Gemini generates a financial summary including
+
+* Spending insights
+* Overall spending behaviour
+* Risk level
+
+Example
 
 ```json
 {
-    "job_id": 17,
-    "status": "completed",
-    "filename": "transactions.csv",
-    "rows_received": 95,
-    "rows_saved": 82,
-    "duplicates_removed": 13,
-    "processing_time_ms": 118
+    "narrative": "Most expenses were related to shopping and food. Spending is balanced with no major anomalies.",
+    "risk_level": "Low"
 }
 ```
 
 ---
 
-## Improvements Added
+# Sample Workflow
 
-* Duplicate transaction removal
-* Duplicate database protection
-* Job statistics
-* Processing time measurement
-* Logging
-* Better Swagger documentation
-* Professional API descriptions
-* Processing summary response
+1. Upload CSV
+2. Celery receives background task
+3. CSV is validated
+4. Duplicate transactions are removed
+5. Missing categories are classified using Gemini
+6. Transactions are checked for anomalies
+7. Data is stored in PostgreSQL
+8. Spending summary is generated
+9. Job status is updated
+10. Results are available through the API
 
 ---
 
-## Author
+# Example Upload Response
 
-Soundarya M
+```json
+{
+    "job_id": 662686,
+    "status": "PENDING",
+    "message": "CSV uploaded successfully. Processing started."
+}
+```
+
+---
+
+# Example Job Status
+
+```json
+{
+    "job_id": 662686,
+    "status": "completed",
+    "row_count_raw": 95,
+    "row_count_clean": 82
+}
+```
+
+---
+
+# Improvements Implemented
+
+* Duplicate transaction removal
+* Duplicate database protection
+* Background task processing
+* AI-powered category prediction
+* AI-powered anomaly detection
+* AI-generated spending summary
+* Job tracking
+* PostgreSQL integration
+* Redis queue
+* Docker support
+* Modular architecture
+* Swagger documentation
+* Error handling
+* Logging
+
+---
+
+# Future Enhancements
+
+* JWT Authentication
+* Role-Based Access Control
+* Batch upload support
+* Email notifications
+* Dashboard analytics
+* Export processed transactions
+* Unit and integration testing
+* CI/CD pipeline
+
+---
+
+# Author
+
+**Soundarya M**
+
+B.Tech Artificial Intelligence & Data Science
+
+KCG College of Technology
+
+GitHub:
+https://github.com/SoundaryaMohan21
